@@ -2,6 +2,8 @@ const fs = require('fs');
 const path = require('path');
 const rootDir = require("../helpers/path");
 
+const Cart = require('./cart')
+
 const p = path.join(rootDir, 'data', 'products.json')
 
 const getProductsFromFile = (cb) => {
@@ -15,7 +17,8 @@ const getProductsFromFile = (cb) => {
 }
 
 module.exports = class Product {
-    constructor(title, imageUrl, description, price) {
+    constructor(id, title, imageUrl, description, price) {
+        this.id = id;
         this.title = title;
         this.imageUrl = imageUrl;
         this.description = description;
@@ -24,14 +27,37 @@ module.exports = class Product {
     }
 
     save() {
-        this.id = (Math.random()*1000).toString();
         getProductsFromFile(products => {
-            products.push(this);
-            fs.writeFile(p, JSON.stringify(products), err => {
-                console.log('error occured', err)
-            })
+            if (this.id) {
+                const existingProductIndex = products.findIndex(item => item.id === this.id);
+                const updatedProducts = [...products];
+                updatedProducts[existingProductIndex] = this;
+                fs.writeFile(p, JSON.stringify(updatedProducts), err => {
+                    console.log('error occured', err)
+                })
+            } else {
+                this.id = (Math.random() * 1000).toString();
+                products.push(this);
+                fs.writeFile(p, JSON.stringify(products), err => {
+                    console.log('error occured', err)
+                })
+            }
         });
     }
+
+    static delete(productId) {
+        getProductsFromFile(products => {
+            const existingProductIndex = products.findIndex(item => item.id === productId);
+            const existingProductPrice = products[existingProductIndex]['price'];
+            products.splice(existingProductIndex, 1);
+            fs.writeFile(p, JSON.stringify(products), err => {
+                if(!err) {
+                    Cart.deleteProduct(productId, existingProductPrice)
+                }
+            })
+        })
+    }
+
     static findProductById(id, cb) {
         getProductsFromFile(products => {
             const prodItem = products.find(item => item.id === id);

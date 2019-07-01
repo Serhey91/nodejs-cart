@@ -6,9 +6,6 @@ const p = path.join(rootDir, 'data', 'cart.json')
 
 module.exports = class Cart {
     static addProduct(id, productPrice) {
-        //fetch cart
-        //analize
-        //
         fs.readFile(p, (err, fileContent) => {
             let cart = {
                 products: [],
@@ -31,6 +28,20 @@ module.exports = class Cart {
             }
             cart.totalPrice += +productPrice;
             fs.writeFile(p, JSON.stringify(cart), err => {
+                console.log(err)
+            })
+        })
+    }
+
+    static deleteProduct(id, price) {
+        fs.readFile(p, (err, fileContent) => {
+            if(err) return
+            let cart = JSON.parse(fileContent)
+            const updatedCart = { ...cart };
+            const product = updatedCart.products.find(p => p.id === id);
+            updatedCart.products = updatedCart.products.filter(p => p.id !== id)
+            updatedCart.totalPrice = cart.totalPrice - product.count * price;
+            fs.writeFile(p, JSON.stringify(updatedCart), err => {
                 console.log(err)
             })
         })
