@@ -9,10 +9,31 @@ exports.getAddProduct = (req, res, next) => {
 }
 
 exports.postAddProduct = (req, res, next) => {
-    const { title, description, imageUrl, price } = req.body;
-    const product = new Product(null, title, imageUrl, description, price);
-    product.save();
-    res.redirect('/');
+    const {
+        title,
+        description,
+        imageUrl,
+        price
+    } = req.body;
+    //SEQUELIZE
+    Product.create({
+            title,
+            price,
+            imageUrl,
+            description
+        }).then(() => {
+            console.log('Added product')
+            res.redirect('/');
+        })
+        .catch(err => console.log(err));
+
+    //MYSQL
+    // const product = new Product(null, title, imageUrl, description, price);
+    // product.save()
+    //     .then(() => {
+    //         res.redirect('/');
+    //     })
+    //     .catch(err => console.log(err));
 }
 
 exports.getEditProduct = (req, res, next) => {
@@ -21,7 +42,7 @@ exports.getEditProduct = (req, res, next) => {
         return res.redirect('/')
     }
     Product.findProductById(req.params.id, product => {
-        if(!product) return res.redirect('/')
+        if (!product) return res.redirect('/')
         res.render('admin/edit-product', {
             pageTitle: 'Edit product',
             path: '/admin/edit-product',
@@ -32,24 +53,46 @@ exports.getEditProduct = (req, res, next) => {
 }
 
 exports.postEditProduct = (req, res, next) => {
-    const { productId, title, description, imageUrl, price } = req.body;
+    const {
+        productId,
+        title,
+        description,
+        imageUrl,
+        price
+    } = req.body;
     const product = new Product(productId, title, imageUrl, description, price);
     product.save();
     res.redirect('/admin/products');
 }
 
 exports.postDeleteProduct = (req, res, next) => {
-    const { productId } = req.body;
-    Product.delete(productId);
-    res.redirect('/admin/products');
+    const {
+        productId
+    } = req.body;
+    Product.delete(productId).then(() => {
+        res.redirect('/admin/products');
+    }).catch(err => console.log(err))
 }
 
 exports.getAdminProducts = (req, res, next) => {
-    Product.fetchAll(products => {
+    //SEQUELIZE
+    Product.findAll().then(products => {
         res.render('admin/products', {
             pageTitle: 'Admin products page',
             path: '/admin/products',
             products
         })
     })
+    .catch(err => console.log(err));
+    //MYSQL
+    // Product.fetchAll()
+    //     .then(([rows, field]) => {
+    //         res.render('admin/products', {
+    //             pageTitle: 'Admin products page',
+    //             path: '/admin/products',
+    //             products: rows
+    //         })
+    //     })
+    //     .catch(err => console.log(err));
+
 }

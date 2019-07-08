@@ -1,13 +1,26 @@
 const Product = require('../models/product');
 const Cart = require('../models/cart');
 exports.getProducts = (req, res, next) => {
-    Product.fetchAll(products => {
-        res.render('shop/product-list', {
-            products,
-            pageTitle: 'Products',
-            path: '/products'
+    //SEQUELIZE
+    Product.findAll().then(products => {
+            res.render('shop/product-list', {
+                products,
+                pageTitle: 'Products',
+                path: '/products'
+            })
         })
-    });
+        .catch(err => console.log(err));
+
+    //MYSQL
+    // Product.fetchAll()
+    // .then(([rows, field]) => {
+    //     res.render('shop/product-list', {
+    //         products: rows,
+    //         pageTitle: 'Products',
+    //         path: '/products'
+    //     })
+    // })
+    // .catch(err => console.log(err));
     // rendering for pug file
     // res.sendFile(path.join(rootDir,  'views', 'shop.html'))
     // res.send('<h1>Hello from express</h1>') //sending html
@@ -16,41 +29,82 @@ exports.getProducts = (req, res, next) => {
 
 exports.getCurrentProduct = (req, res, next) => {
     const prodId = req.params.id;
-    Product.findProductById(prodId, (item) => {
+    //SEQUELIZE
+    // Product.findAll({where: {id: prodId}})
+    // .then(products => {
+    //     res.render('shop/product-detail', {
+    //         product: products[0],
+    //         pageTitle: products[0].title,
+    //         path: `/products`
+    //     })
+    // })
+    // .catch(err => console.log(err))
+
+    Product.findByPk(prodId)
+    .then(product => {
         res.render('shop/product-detail', {
-            product: item,
-            pageTitle: 'Product detail page',
+            product,
+            pageTitle: product.title,
             path: `/products`
         })
     })
+    .catch(err => console.log(err))
 
+    //MYSQL
+    // Product.findProductById(prodId)
+    //     .then(([item]) => {
+    //         console.log(item)
+    //         res.render('shop/product-detail', {
+    //             product: item[0],
+    //             pageTitle: item[0].title,
+    //             path: `/products`
+    //         })
+    //     })
+    //     .catch(err => console.log(err));
 }
 
 exports.getIndex = (req, res, next) => {
-    Product.fetchAll(products => {
+    //SEQUELIZE
+
+    Product.findAll().then(products => {
         res.render('shop/index', {
             products,
             pageTitle: 'Shop',
             path: '/'
         })
     })
+    .catch(err => console.log(err));
+
+    //MYSQL
+    // Product.fetchAll()
+    //     .then(([rows, field]) => {
+    //         res.render('shop/index', {
+    //             products: rows,
+    //             pageTitle: 'Shop',
+    //             path: '/'
+    //         })
+    //     })
+    //     .catch(err => console.log(err));
 }
 
 exports.getCart = (req, res, next) => {
     Cart.getCart(cart => {
         Product.fetchAll(products => {
             const cartProducts = []
-            for(product of products) {
+            for (product of products) {
                 const cartProductData = cart.products.find(prod => prod.id === product.id);
-                if(cartProductData) {
-                    cartProducts.push({productData: product, count: cartProductData.count})
+                if (cartProductData) {
+                    cartProducts.push({
+                        productData: product,
+                        count: cartProductData.count
+                    })
                 }
             }
             res.render('shop/cart', { // render page - ejs/pug etc
                 pageTitle: 'Your Cart',
                 path: '/cart', //route that will handle it,
                 products: cartProducts
-                
+
             })
         })
     })
