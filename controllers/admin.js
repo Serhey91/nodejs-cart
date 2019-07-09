@@ -23,7 +23,7 @@ exports.postAddProduct = (req, res, next) => {
             description
         }).then(() => {
             console.log('Added product')
-            res.redirect('/');
+            res.redirect('/admin/products');
         })
         .catch(err => console.log(err));
 
@@ -41,8 +41,11 @@ exports.getEditProduct = (req, res, next) => {
     if (!editMode) {
         return res.redirect('/')
     }
-    Product.findProductById(req.params.id, product => {
-        if (!product) return res.redirect('/')
+    Product.findByPk(req.params.id)
+    .then(product => {
+        if (!product) {
+            return res.redirect('/')
+        }
         res.render('admin/edit-product', {
             pageTitle: 'Edit product',
             path: '/admin/edit-product',
@@ -50,6 +53,7 @@ exports.getEditProduct = (req, res, next) => {
             product
         })
     })
+    .catch(err => console.log(err))
 }
 
 exports.postEditProduct = (req, res, next) => {
@@ -60,18 +64,26 @@ exports.postEditProduct = (req, res, next) => {
         imageUrl,
         price
     } = req.body;
-    const product = new Product(productId, title, imageUrl, description, price);
-    product.save();
-    res.redirect('/admin/products');
+    Product.findByPk(productId)
+    .then(product => {
+        product.title = title;
+        product.description = description;
+        product.imageUrl = imageUrl;
+        product.price = price;
+        return product.save(); //will create if no exist with such
+    })
+    .then(() => res.redirect('/admin/products'))
+    .catch(err => console.log(err));
 }
 
 exports.postDeleteProduct = (req, res, next) => {
     const {
         productId
     } = req.body;
-    Product.delete(productId).then(() => {
-        res.redirect('/admin/products');
-    }).catch(err => console.log(err))
+    Product.findByPk(productId)
+    .then(product => product.destroy())
+    .then(() => res.redirect('/admin/products'))
+    .catch(err => console.log(err))
 }
 
 exports.getAdminProducts = (req, res, next) => {
