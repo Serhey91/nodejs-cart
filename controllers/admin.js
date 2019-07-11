@@ -16,12 +16,21 @@ exports.postAddProduct = (req, res, next) => {
         price
     } = req.body;
     //SEQUELIZE
-    Product.create({
-            title,
-            price,
-            imageUrl,
-            description
-        }).then(() => {
+    //having relations between user and product
+    req.user.createProduct({
+        title,
+        price,
+        imageUrl,
+        description,
+    })
+    // Product.create({
+    //         title,
+    //         price,
+    //         imageUrl,
+    //         description,
+    //         userId: req.user.id
+    //     })
+    .then(() => {
             console.log('Added product')
             res.redirect('/admin/products');
         })
@@ -41,19 +50,23 @@ exports.getEditProduct = (req, res, next) => {
     if (!editMode) {
         return res.redirect('/')
     }
-    Product.findByPk(req.params.id)
-    .then(product => {
-        if (!product) {
-            return res.redirect('/')
-        }
-        res.render('admin/edit-product', {
-            pageTitle: 'Edit product',
-            path: '/admin/edit-product',
-            editing: editMode,
-            product
+    //with relations
+    req.user.getProducts({where: {id: req.params.id}})
+    //without relations
+    // Product.findByPk(req.params.id)
+        .then(products => {
+            const product = products[0]
+            if (!product) {
+                return res.redirect('/')
+            }
+            res.render('admin/edit-product', {
+                pageTitle: 'Edit product',
+                path: '/admin/edit-product',
+                editing: editMode,
+                product: product
+            })
         })
-    })
-    .catch(err => console.log(err))
+        .catch(err => console.log(err))
 }
 
 exports.postEditProduct = (req, res, next) => {
@@ -65,15 +78,15 @@ exports.postEditProduct = (req, res, next) => {
         price
     } = req.body;
     Product.findByPk(productId)
-    .then(product => {
-        product.title = title;
-        product.description = description;
-        product.imageUrl = imageUrl;
-        product.price = price;
-        return product.save(); //will create if no exist with such
-    })
-    .then(() => res.redirect('/admin/products'))
-    .catch(err => console.log(err));
+        .then(product => {
+            product.title = title;
+            product.description = description;
+            product.imageUrl = imageUrl;
+            product.price = price;
+            return product.save(); //will create if no exist with such
+        })
+        .then(() => res.redirect('/admin/products'))
+        .catch(err => console.log(err));
 }
 
 exports.postDeleteProduct = (req, res, next) => {
@@ -81,21 +94,23 @@ exports.postDeleteProduct = (req, res, next) => {
         productId
     } = req.body;
     Product.findByPk(productId)
-    .then(product => product.destroy())
-    .then(() => res.redirect('/admin/products'))
-    .catch(err => console.log(err))
+        .then(product => product.destroy())
+        .then(() => res.redirect('/admin/products'))
+        .catch(err => console.log(err))
 }
 
 exports.getAdminProducts = (req, res, next) => {
     //SEQUELIZE
-    Product.findAll().then(products => {
-        res.render('admin/products', {
-            pageTitle: 'Admin products page',
-            path: '/admin/products',
-            products
+    req.user.getProducts()
+    // Product.findAll()
+    .then(products => {
+            res.render('admin/products', {
+                pageTitle: 'Admin products page',
+                path: '/admin/products',
+                products
+            })
         })
-    })
-    .catch(err => console.log(err));
+        .catch(err => console.log(err));
     //MYSQL
     // Product.fetchAll()
     //     .then(([rows, field]) => {

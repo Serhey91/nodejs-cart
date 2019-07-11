@@ -9,6 +9,8 @@ const {
 
 const Product = require('./models/product')
 const User = require('./models/user')
+const Cart = require('./models/cart')
+const CartItem = require('./models/cart-item')
 //connecting for DB
 const dbSequelize = require('./helpers/database');
 
@@ -58,18 +60,23 @@ app.use(getErrorPage);
 Product.belongsTo(User, {constraints: true, onDelete: 'CASCADE'}); // delete product and at user delete it also
 User.hasMany(Product)
 
+User.hasOne(Cart);
+Cart.belongsTo(User);
+
+Cart.belongsToMany(Product, {through: CartItem});
+Product.belongsToMany(Cart, {through: CartItem});
+
 //define all models in app and compare it with DB. If there is no DB - it creates 
 // tables and creates relations, if yes - creates relations
 dbSequelize
-// .sync({force: true})
-    .sync()
+.sync({force: true})
+    // .sync()
     .then(data => User.findByPk(1))
     .then(user => {
         if (!user) return User.create({name: 'Ivan', email: 'test@gmail.com'})
         return user
     })
-    .then(user => {
-        app.listen(PORT, () => console.log(`Connecting to port ${PORT}`));
-    })
+    .then(user => user.createCart())
+    .then(() => { app.listen(PORT, () => console.log(`Connecting to port ${PORT}`))})
     .catch(err => console.log(err))
 
