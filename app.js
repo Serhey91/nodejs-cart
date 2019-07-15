@@ -11,6 +11,8 @@ const Product = require('./models/product')
 const User = require('./models/user')
 const Cart = require('./models/cart')
 const CartItem = require('./models/cart-item')
+const Order = require('./models/order')
+const OrderItem = require('./models/order-item')
 //connecting for DB
 const dbSequelize = require('./helpers/database');
 
@@ -66,11 +68,15 @@ Cart.belongsTo(User);
 Cart.belongsToMany(Product, {through: CartItem});
 Product.belongsToMany(Cart, {through: CartItem});
 
+Order.belongsTo(User);
+User.hasMany(Order);
+Order.belongsToMany(Product, {through: OrderItem})
+
 //define all models in app and compare it with DB. If there is no DB - it creates 
 // tables and creates relations, if yes - creates relations
 dbSequelize
-.sync({force: true})
-    // .sync()
+// .sync({force: true})
+    .sync()
     .then(data => User.findByPk(1))
     .then(user => {
         if (!user) return User.create({name: 'Ivan', email: 'test@gmail.com'})
