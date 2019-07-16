@@ -1,7 +1,7 @@
 const Sequelize = require('sequelize');
 const sequelize = require("../helpers/database"); //database what is connected
 
-const CartItem = sequelize.define('cart-item', {
+const CartItem = sequelize.define('cartItem', {
     id: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
