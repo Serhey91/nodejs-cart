@@ -3,7 +3,7 @@ const app = express(); //creating express application
 //setting a global configuration value
 const path = require('path');
 const { getErrorPage } = require('./controllers/404')
-
+const { mongoConnect } = require('./helpers/database')
 // view engine - using some package
 //views - all html pages for showing
 
@@ -22,4 +22,7 @@ app.use('/admin', adminRoutes);
 app.use(shopRoutes);
 
 app.use(getErrorPage)
-app.listen(PORT, () => console.log(`Connecting to port ${PORT}`));
+
+mongoConnect(() => {
+    app.listen(PORT, () => console.log(`Connecting to port ${PORT}`));
+})
