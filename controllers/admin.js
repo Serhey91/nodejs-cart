@@ -48,9 +48,11 @@ exports.postDeleteProduct = (req, res, next) => {
 }
 
 exports.getAdminProducts = (req, res, next) => {
+    Product.fetchAll().then(products => {
         res.render('admin/products', {
             pageTitle: 'Admin products page',
             path: '/admin/products',
-            products: []
+            products
         })
+    })
 }
