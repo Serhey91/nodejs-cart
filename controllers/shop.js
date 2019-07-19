@@ -1,19 +1,14 @@
 const Product = require('../models/product');
-const Cart = require('../models/cart');
+// const Cart = require('../models/cart');
 exports.getProducts = (req, res, next) => {
     Product.fetchAll().then(products => {
-        console.log(products)
         res.render('shop/product-list', {
             products,
             pageTitle: 'Products',
             path: '/products'
         })
-    });
-    // rendering for pug file
-    // res.sendFile(path.join(rootDir,  'views', 'shop.html'))
-    // res.send('<h1>Hello from express</h1>') //sending html
-    // next() => has to be executed for next middleware funtions
-} // handling middleware functions - will be for every incoming events
+    });   
+}
 
 exports.getCurrentProduct = (req, res, next) => {
     const prodId = req.params.id;
@@ -39,31 +34,32 @@ exports.getIndex = (req, res, next) => {
 }
 
 exports.getCart = (req, res, next) => {
-    Cart.getCart(cart => {
-        Product.fetchAll(products => {
-            const cartProducts = []
-            for(product of products) {
-                const cartProductData = cart.products.find(prod => prod.id === product.id);
-                if(cartProductData) {
-                    cartProducts.push({productData: product, count: cartProductData.count})
-                }
-            }
-            res.render('shop/cart', { // render page - ejs/pug etc
-                pageTitle: 'Your Cart',
-                path: '/cart', //route that will handle it,
-                products: cartProducts
+    req.user.getCart()
+    .then(data => console.log('CART', data))
+    // Cart.getCart(cart => {
+    //     Product.fetchAll(products => {
+    //         const cartProducts = []
+    //         for(product of products) {
+    //             const cartProductData = cart.products.find(prod => prod.id === product.id);
+    //             if(cartProductData) {
+    //                 cartProducts.push({productData: product, count: cartProductData.count})
+    //             }
+    //         }
+    //         res.render('shop/cart', { // render page - ejs/pug etc
+    //             pageTitle: 'Your Cart',
+    //             path: '/cart', //route that will handle it,
+    //             products: cartProducts
                 
-            })
-        })
-    })
+    //         })
+    //     })
+    // })
 }
 
 exports.postCart = (req, res, next) => {
     const productId = req.body.id;
-    Product.findProductById(productId, (item) => {
-        Cart.addProduct(productId, item.price)
-        res.redirect('/cart')
-    })
+    Product.fetchOne(productId)
+    .then(prod => req.user.addToCart(prod))
+    .then(result => res.redirect('/cart'))
 }
 
 exports.deleteCartItem = (req, res, next) => {

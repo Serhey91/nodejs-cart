@@ -4,6 +4,7 @@ const app = express(); //creating express application
 const path = require('path');
 const { getErrorPage } = require('./controllers/404')
 const { mongoConnect } = require('./helpers/database')
+const User = require('./models/user');
 // view engine - using some package
 //views - all html pages for showing
 
@@ -17,6 +18,17 @@ const PORT = 3333;
 
 app.use(express.urlencoded({extended: true}));//sending via command line
 app.use(express.static(path.join(__dirname, 'public'))); //for static files in system
+
+app.use((req, res, next) => {
+    User.findById('5d31cdf4da8bbe2117489381')
+    .then(({name, email, cart, _id}) => {
+        req.user = new User(name, email, cart, _id);
+        next()
+    })
+    .catch(err => console.log(err))
+    // next()
+})
+
 //connecting routes for app
 app.use('/admin', adminRoutes);
 app.use(shopRoutes);
