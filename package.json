@@ -4,7 +4,8 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "start": "nodemon app.js"
+    "start": "nodemon app.js",
+    "pretest": "eslint --ignore-path .gitignore ."
   },
   "keywords": [],
   "author": "",
@@ -15,5 +16,10 @@
     "express": "^4.17.1",
     "express-handlebars": "^3.1.0",
     "pug": "^2.0.4"
+  },
+  "devDependencies": {
+    "eslint": "^6.1.0",
+    "eslint-config-google": "^0.13.0",
+    "eslint-config-strongloop": "^2.1.0"
   }
 }
