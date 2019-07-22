@@ -23,7 +23,7 @@ class User {
         const updatedCartItems = [...this.cart.items];
         
         if (cartProductIndex >= 0) {
-            newQTY = this.cart.items[cartProductIndex].quantity + 1;
+            newQTY = updatedCartItems[cartProductIndex].quantity + 1;
             updatedCartItems[cartProductIndex].quantity = newQTY;
         } else {
             updatedCartItems.push({productId: new mongodb.ObjectId(product._id), quantity: 1})
@@ -38,19 +38,23 @@ class User {
             .catch(error => console.log(error))
     }
     getCart() {
-        //STOP HERE!!!
         const db = getDb();
-        const productIds = this.cart.items.map(item => item.productId)
+        const productIds = this.cart.items.map(item => item.productId);
         return db.collection('products')
-        .find({_id: {
-            $in: [productIds]
-        }})
-        .toArray()
-        .then(data => {
-            return data.map(p => {return {...p, quantity: this.cart.items.find(i => i.productId.toString() === p._id.toString())}})
+        .find({_id : {
+            //return all alements - which ids - is equal to productId
+            $in: productIds
+        }}).toArray()
+        .then(products => {
+            return products.map(prod => {
+                const { quantity } = this.cart.items.find(item => item.productId.toString() === prod._id.toString())
+                return {
+                    ...prod,
+                    quantity
+                }
+            })
         })
-        .catch(error => console.log(error))
-        // return this.cart;
+
     }
 
     static findById(id) {

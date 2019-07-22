@@ -47,7 +47,7 @@ class Product {
     static fetchOne(id) {
         const db = getDb();
         return db.collection('products')
-        .find({_id: new mongodb.ObjectId(id)}) //will give a cursor
+        .find({_id: new mongodb.ObjectId(id)}) // will give a cursor
         .next()
         .then(data => data)
         .catch(error => console.log(error))

@@ -35,7 +35,13 @@ exports.getIndex = (req, res, next) => {
 
 exports.getCart = (req, res, next) => {
     req.user.getCart()
-    .then(data => console.log('CART', data))
+    .then(products => {
+        res.render('shop/cart', { // render page - ejs/pug etc
+            pageTitle: 'Your Cart',
+            path: '/cart', //route that will handle it,
+            products,            
+        });
+    })
     // Cart.getCart(cart => {
     //     Product.fetchAll(products => {
     //         const cartProducts = []
@@ -60,6 +66,7 @@ exports.postCart = (req, res, next) => {
     Product.fetchOne(productId)
     .then(prod => req.user.addToCart(prod))
     .then(result => res.redirect('/cart'))
+    .catch(error => console.log(error))
 }
 
 exports.deleteCartItem = (req, res, next) => {
