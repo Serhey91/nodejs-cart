@@ -1,11 +1,10 @@
 {
   "name": "002_express.js",
   "version": "1.0.0",
-  "description": "",
   "main": "app.js",
   "scripts": {
     "start": "nodemon app.js",
-    "pretest": "node_modules/.bin/eslint --ignore-path .gitignore ."
+    "pretest": "eslint --ignore-path .gitignore ."
   },
   "keywords": [],
   "author": "",
@@ -13,6 +12,7 @@
   "dependencies": {
     "body-parser": "^1.19.0",
     "ejs": "^2.6.2",
+    "eslint-config-google": "^0.13.0",
     "express": "^4.17.1",
     "express-handlebars": "^3.1.0",
     "pug": "^2.0.4"
@@ -21,5 +21,14 @@
     "eslint": "^6.1.0",
     "eslint-config-airbnb": "^0.13.0",
     "eslint-config-strongloop": "^2.1.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Serhey91/nodejs-cart.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Serhey91/nodejs-cart/issues"
+  },
+  "homepage": "https://github.com/Serhey91/nodejs-cart#readme",
+  "description": ""
 }
